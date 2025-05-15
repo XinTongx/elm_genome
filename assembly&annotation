@@ -34,11 +34,14 @@ Assembly Statistics:
         0.000%  Percent gaps
         43 MB   Scaffold N50
         43 MB   Contigs N50
+
 ==Stats==
 $ source /apl/bio/etc/bio.sh
 $ seqkit stats out.p_ctg.fa
 file          format  type  num_seqs        sum_len  min_len      avg_len      max_len
 out.p_ctg.fa  FASTA   DNA        853  1,830,661,461   10,069  2,146,144.7  159,564,346
+
+
 ==check contamin==
 1. blastp
 
@@ -55,15 +58,16 @@ blastp -query ~/elm_trans.fa.transdecoder_dir/longest_orfs.pep \
  -db nr \
  -out blastp_trans_em_stitle.out \
  -evalue 1e-5 \
- -max_target_seqs 3 \
- -outfmt "6 qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore stitle" 
-
-*check provious result with stitle
+ -max_target_seqs 1 \
+ -outfmt
+* better have done with stitle 
+*check provious result, the one w/o stitle
 cut -f2 blastp_trans_em.out | sort | uniq > sseqid_list.txt
 blastdbcmd -db nr -entry_batch sseqid_list.txt -outfmt "%a %t [%S]" > id_to_species.txt
-Error: [blastdbcmd] Skipped CAL1567571.1
-Error: [blastdbcmd] Skipped XP_015892326.2
-Error: [blastdbcmd] Skipped XP_023912816.1
+Error: [blastdbcmd] Skipped CAL1567571.1 (NCBI Record removed)
+
+Error: [blastdbcmd] Skipped XP_015892326.2 (NCBI Record suppressed) Quercus suber
+Error: [blastdbcmd] Skipped XP_023912816.1 ('') Quercus suber
 
 sed -E 's/.*(\[[^]]+\])$/\1/' id_to_species.txt | sed 's/\[//; s/\]//' > species_column.txt
 wk '{print $1}' id_to_species.txt > protein_column.txt
@@ -78,9 +82,37 @@ cp names.dmp nodes.dmp delnodes.dmp merged.dmp ~/.taxonkit/
 
 cut -f2 species_taxid.tsv > taxids.txt
 ./taxonkit lineage taxids.txt > lineage.tsv
-./taxonkit reformat lineage.tsv > lineage.names.tsv
 
+grep -v "Viridiplantae" lineage.tsv > non_plants.tsv
+74547   cellular organisms;Bacteria;Bacillati;Cyanobacteriota/Melainabacteria group;Cyanobacteriota;Cyanophyceae;Synechococcales;Prochlorococcaceae;Prochlorococcus;Prochlorococcus marinus;Prochlorococcus marinus str. MIT 9313
+386267  cellular organisms;Eukaryota;Opisthokonta;Metazoa;Eumetazoa;Bilateria;Deuterostomia;Chordata;Craniata;Vertebrata;Gnathostomata;Teleostomi;Euteleostomi;Sarcopterygii;Dipnotetrapodomorpha;Tetrapoda;Amphibia;Batrachia;Anura;Neobatrachia;Ranoidea;Ranidae;Staurois;Staurois parvus
+1313    cellular organisms;Bacteria;Bacillati;Bacillota;Bacilli;Lactobacillales;Streptococcaceae;Streptococcus;Streptococcus pneumoniae
+77133   cellular organisms;Bacteria;environmental samples;uncultured bacterium
+599730  cellular organisms;Eukaryota;Opisthokonta;Fungi;Dikarya;Ascomycota;saccharomyceta;Saccharomycotina;Saccharomycetes;Phaffomycetales;Wickerhamomycetaceae;Wickerhamomyces;Wickerhamomyces pijperi
+738     cellular organisms;Bacteria;Pseudomonadati;Pseudomonadota;Gammaproteobacteria;Pasteurellales;Pasteurellaceae;Glaesserella;Glaesserella parasuis
+358     cellular organisms;Bacteria;Pseudomonadati;Pseudomonadota;Alphaproteobacteria;Hyphomicrobiales;Rhizobiaceae;Rhizobium/Agrobacterium group;Agrobacterium;Agrobacterium tumefaciens complex;Agrobacterium tumefaciens
+8018    cellular organisms;Eukaryota;Opisthokonta;Metazoa;Eumetazoa;Bilateria;Deuterostomia;Chordata;Craniata;Vertebrata;Gnathostomata;Teleostomi;Euteleostomi;Actinopterygii;Actinopteri;Neopterygii;Teleostei;Osteoglossocephalai;Clupeocephala;Euteleosteomorpha;Protacanthopterygii;Salmoniformes;Salmonidae;Salmoninae;Oncorhynchus;Oncorhynchus keta
 
+$$$extract from original blastp.out for non-plant contig
+
+MSTRG.12.2.p2   QTK80895.1      34.454  119     76      2       1       118     141     258     1.63e-15        86.7
+MSTRG.12.1.p2   QTK80895.1      34.454  119     76      2       1       118     141     258     1.63e-15        86.7
+MSTRG.12.3.p2   QTK80895.1      34.454  119     76      2       1       118     141     258     1.63e-15        86.7
+MSTRG.12.4.p2   QTK80895.1      34.454  119     76      2       1       118     141     258     1.63e-15        86.7
+MSTRG.12.5.p2   QTK80895.1      34.454  119     76      2       1       118     141     258     1.63e-15        86.7
+MSTRG.24.1.p2   XP_052316685.1  33.238  349     199     13      45      371     37      373     3.73e-35        144
+MSTRG.24.1.p2   XP_052316685.1  31.635  373     201     15      17      367     39      379     9.75e-32        135
+MSTRG.24.1.p2   XP_052316685.1  33.239  355     200     14      2       331     37      379     1.17e-31        135
+MSTRG.24.1.p2   XP_052316685.1  31.988  322     173     13      74      371     24      323     1.59e-28        127
+MSTRG.24.1.p3   CAI9611998.1    32.374  139     82      5       6       132     6       144     7.13e-16        80.5
+MSTRG.27.2.p2   MDP0317783.1    33.000  200     131     2       47      244     41      239     8.83e-25        110
+MSTRG.27.2.p2   MDP0317783.1    30.901  233     142     4       12      244     44      257     2.74e-22        103
+MSTRG.35.1.p2   EKD39201.1      22.581  155     120     0       7       161     22      176     1.22e-09        67.8
+MSTRG.214.1.p3  CRG02860.1      55.172  87      39      0       3       89      47      133     1.09e-17        83.6
+MSTRG.444.1.p2  KAH3685335.1    43.878  98      54      1       30      126     3       100     9.07e-08        61.6
+MSTRG.488.1.p4  CAI8260823.1    71.698  53      15      0       29      81      2       54      5.03e-09        62.8
+
+*pay attention to MSTRG.12 & MSTRG.24
 
 Annotation
 
