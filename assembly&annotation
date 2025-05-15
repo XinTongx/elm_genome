@@ -1,9 +1,44 @@
 Assembly 
+=hifi assembly=
+#!/bin/bash        
+#SBATCH -p batch
+#SBATCH -c 32
 
+~/bin/hifiasm-0.19.8/hifiasm -o out -t 32 \
+~/m64210R1e_240111_025744.hifi_reads.fastq.gz \
+~/m64210R1e_240124_024639.hifi_reads.fastq.gz
 
+awk '/^S/{print ">"$2;print $3}' out.bp.p_ctg.gfa > out.p_ctg.fa
+awk '/^S/{print ">"$2;print $3}' out.bp.hap1.p_ctg.gfa > out.bp.hap1.p_ctg.fa
+awk '/^S/{print ">"$2;print $3}' out.bp.hap2.p_ctg.gfa > out.bp.hap2.p_ctg.fa
 
+==busco==
+/rawdata/out.p_ctg.fa
+# BUSCO was run in mode: euk_genome_min
+# Gene predictor used: miniprot
 
+        ***** Results: *****
 
+        C:98.2%[S:92.2%,D:6.0%],F:0.8%,M:1.0%,n:2326,E:3.5%        
+        2284    Complete BUSCOs (C)     (of which 80 contain internal stop codons)                 
+        2145    Complete and single-copy BUSCOs (S)        
+        139     Complete and duplicated BUSCOs (D)         
+        19      Fragmented BUSCOs (F)                      
+        23      Missing BUSCOs (M)                         
+        2326    Total BUSCO groups searched                
+
+Assembly Statistics:
+        853     Number of scaffolds
+        853     Number of contigs
+        1830661461      Total length
+        0.000%  Percent gaps
+        43 MB   Scaffold N50
+        43 MB   Contigs N50
+==Stats==
+$ source /apl/bio/etc/bio.sh
+$ seqkit stats out.p_ctg.fa
+file          format  type  num_seqs        sum_len  min_len      avg_len      max_len
+out.p_ctg.fa  FASTA   DNA        853  1,830,661,461   10,069  2,146,144.7  159,564,346
 
 
 Annotation
