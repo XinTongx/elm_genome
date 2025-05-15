@@ -39,6 +39,24 @@ $ source /apl/bio/etc/bio.sh
 $ seqkit stats out.p_ctg.fa
 file          format  type  num_seqs        sum_len  min_len      avg_len      max_len
 out.p_ctg.fa  FASTA   DNA        853  1,830,661,461   10,069  2,146,144.7  159,564,346
+==check contamin==
+1. blastp
+
+#!/bin/bash
+#PBS -q blast
+#PBS -l select=1:ncpus=96:mpiprocs=1:ompthreads=96
+#PBS -l walltime=48:00:00
+
+cd ${PBS_O_WORKDIR}
+source /apl/bio/etc/bio.sh
+module load blast+/2.16.0
+
+blastp -query ~/elm_trans.fa.transdecoder_dir/longest_orfs.pep \
+ -db nr \
+ -out blastp_trans_em_stitle.out \
+ -evalue 1e-5 \
+ -max_target_seqs 3 \
+ -outfmt "6 qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore stitle" 
 
 
 Annotation
