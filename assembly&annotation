@@ -58,6 +58,29 @@ blastp -query ~/elm_trans.fa.transdecoder_dir/longest_orfs.pep \
  -max_target_seqs 3 \
  -outfmt "6 qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore stitle" 
 
+*check provious result with stitle
+cut -f2 blastp_trans_em.out | sort | uniq > sseqid_list.txt
+blastdbcmd -db nr -entry_batch sseqid_list.txt -outfmt "%a %t [%S]" > id_to_species.txt
+Error: [blastdbcmd] Skipped CAL1567571.1
+Error: [blastdbcmd] Skipped XP_015892326.2
+Error: [blastdbcmd] Skipped XP_023912816.1
+
+sed -E 's/.*(\[[^]]+\])$/\1/' id_to_species.txt | sed 's/\[//; s/\]//' > species_column.txt
+wk '{print $1}' id_to_species.txt > protein_column.txt
+paste protein_column.txt species_column.txt > id_to_species_clean.tsv
+
+cut -f2 id_to_species_clean.tsv > species_names.txt
+wget https://ftp.ncbi.nlm.nih.gov/pub/taxonomy/taxdump.tar.gz
+tar -zxvf taxdump.tar.gz
+mkdir -p ~/.taxonkit
+cp names.dmp nodes.dmp delnodes.dmp merged.dmp ~/.taxonkit/
+./taxonkit name2taxid < species_names.txt > species_taxid.tsv
+
+cut -f2 species_taxid.tsv > taxids.txt
+./taxonkit lineage taxids.txt > lineage.tsv
+./taxonkit reformat lineage.tsv > lineage.names.tsv
+
+
 
 Annotation
 
